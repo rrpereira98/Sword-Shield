@@ -6,11 +6,18 @@ public class PlayerArmor : MonoBehaviour
 {
     PlayerHealth playerHealth;
 
+    // armor pieces
     [SerializeField] GameObject SholderArmorL;
     [SerializeField] GameObject SholderArmorR;
 
+    // armor lvl
     [SerializeField] float armorLevel = 0;
     float currentArmorLevel = 0;
+
+    // items
+    public GameObject shield;
+    public GameObject sword;
+    public GameObject longSword;
 
     // Start is called before the first frame update
     private void Start()

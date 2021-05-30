@@ -7,4 +7,6 @@ public class Health : ScriptableObject
 {
     public int health;
     public int lvl;
+    public int attack;
+    public int accuracy;
 }

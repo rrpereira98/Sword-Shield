@@ -48,6 +48,7 @@ public class DamageDealer : MonoBehaviour
                     enemy.GetComponent<PlayerHealth>().health -= 25;
             }
             hit = false;
+            attackNum = 0;
         }
     }
 }

@@ -4,8 +4,8 @@ using UnityEngine;
 
 public class PlayerController : MonoBehaviour
 {
-    [SerializeField] Animator animator;
-    [SerializeField] GameObject enemy;
+    public Animator animator;
+    public GameObject enemy;
     DamageDealer damageDealer;
     EnemyController enemyController;
     GameManager gameManager;
@@ -14,21 +14,22 @@ public class PlayerController : MonoBehaviour
     public bool itsTurn = true;
     public bool wasHit = false;
     public bool blocking = false;
+    public bool unblockable = false;
     public bool isDead = false;
+    public bool kicked = false;
 
     //Number of attacks
-    int numAttack1 = 0; //sempre
-    bool Attacked1 = false;
+    public int numAttack1 = 0; //sempre
+    public bool Attacked1 = false;
 
-    int numAttack2 = 0; //ronda sim ronda nao
-    bool Attacked2 = false;
+    public int numAttack2 = 0; //ronda sim ronda nao
+    public bool Attacked2 = false;
 
-    int numAttack3 = 0; // 2 em 2 rondas
-    bool Attacked3 = false;
+    public int numAttack3 = 0; // 2 em 2 rondas
+    public bool Attacked3 = false;
 
-    int numAttack4 = 0; // 5 em 5 rondas
-    bool Attacked4 = false;
-
+    public int numAttack4 = 0; // 5 em 5 rondas
+    public bool Attacked4 = false;
 
     private void Start()
     {
@@ -41,8 +42,8 @@ public class PlayerController : MonoBehaviour
     void Update()
     {
         HitAnimHandler();
-        if (itsTurn)
-            Attack();
+        // if (itsTurn)
+        //     Attack();
         CheckHit();
         Dead();
     }
@@ -68,54 +69,13 @@ public class PlayerController : MonoBehaviour
         if (wasHit && !blocking)
             StartCoroutine(WasHit());
         else if (wasHit && blocking)
+        {
             StartCoroutine(Blocked());
-    }
-
-    private void Attack()
-    {
-        if (Input.GetKeyDown(KeyCode.Alpha1) && numAttack1 == 0)
-        {
-            animator.SetInteger("attackNum", 1);
-
-            Attacked1 = true;
-            AttackUses();
-            Attacked1 = false;
-
-            GetComponent<DamageDealer>().attackNum = 1;
-        }
-        else if (Input.GetKeyDown(KeyCode.Alpha2) && numAttack2 == 0)
-        {
-            animator.SetInteger("attackNum", 2);
-
-            Attacked2 = true;
-            AttackUses();
-            Attacked2 = false;
-
-            GetComponent<DamageDealer>().attackNum = 2;
-        }
-        else if (Input.GetKeyDown(KeyCode.Alpha3) && numAttack3 == 0)
-        {
-            animator.SetInteger("attackNum", 3);
-
-            Attacked3 = true;
-            AttackUses();
-            Attacked3 = false;
-
-            GetComponent<DamageDealer>().attackNum = 3;
-        }
-        else if (Input.GetKeyDown(KeyCode.Alpha4) && numAttack4 == 0)
-        {
-            animator.SetInteger("attackNum", 4);
-
-            Attacked4 = true;
-            AttackUses();
-            Attacked4 = false;
-
-            GetComponent<DamageDealer>().attackNum = 4;
+            blocking = false;
         }
     }
 
-    private void AttackUses()
+    public void AttackUses()
     {
         if (numAttack1 == 0 && Attacked1)
         {
@@ -136,6 +96,7 @@ public class PlayerController : MonoBehaviour
         {
             numAttack3 = 2;
             itsTurn = false;
+            enemyController.kicked = true;
         }
         else if (numAttack3 != 0)
         {
@@ -171,6 +132,14 @@ public class PlayerController : MonoBehaviour
         animator.SetBool("WasHit", true);
         yield return new WaitForSeconds(0.64f);
         animator.SetBool("WasHit", false);
+
+        //hit by kick
+        if (kicked)
+        {
+            kicked = false;
+            itsTurn = false;
+            enemyController.itsTurn = true;
+        }
     }
 
     IEnumerator Blocked()

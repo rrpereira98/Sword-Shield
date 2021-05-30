@@ -1009,6 +1009,7 @@ MonoBehaviour:
   blocking: 0
   itsTurn: 0
   isDead: 0
+  kicked: 0
 --- !u!114 &350629943
 MonoBehaviour:
   m_ObjectHideFlags: 0

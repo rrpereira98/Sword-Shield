@@ -6,13 +6,18 @@ using UnityEngine.UI;
 
 public class Menu : MonoBehaviour
 {
-    public void LoadTrainScene()
+    public void LoadTrainingScene()
     {
         SceneManager.LoadScene("SampleScene");
     }
 
+    public void LoadStoreScene()
+    {
+        SceneManager.LoadScene("StoreScene");
+    }
+
     public void LoadMenuScene()
     {
-        SceneManager.LoadScene("Menu");
+        SceneManager.LoadScene("MenuScene");
     }
 }

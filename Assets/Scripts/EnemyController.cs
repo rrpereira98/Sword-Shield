@@ -7,6 +7,7 @@ public class EnemyController : MonoBehaviour
 {
     [SerializeField] Animator animator;
     [SerializeField] GameObject player;
+    [SerializeField] HealthManager healthManager;
     PlayerController playerController;
     DamageDealer damageDealer;
     GameManager gameManager;
@@ -14,9 +15,12 @@ public class EnemyController : MonoBehaviour
     public bool hit = false;
     public bool wasHit = false;
     int attackNum;
-    [SerializeField] bool blocking = false; //serialized for debug
+    public bool blocking = false;
+    bool unblockable = false;
     [SerializeField] public bool itsTurn = false;
     public bool isDead = false;
+    public bool kicked = false;
+    public int baseAccuracy;
 
     //Number of attacks
     int numAttack1 = 0; //sempre
@@ -31,12 +35,16 @@ public class EnemyController : MonoBehaviour
     int numAttack4 = 0; // 5 em 5 rondas
     bool Attacked4 = false;
 
+    int kickProb = -1;
+    int hitProb = 0;
+
     // Start is called before the first frame update
     void Start()
     {
         playerController = player.GetComponent<PlayerController>();
         damageDealer = GetComponent<DamageDealer>();
         gameManager = FindObjectOfType<GameManager>();
+        baseAccuracy = healthManager.accuracy;
     }
 
     // Update is called once per frame
@@ -45,8 +53,10 @@ public class EnemyController : MonoBehaviour
         if (wasHit && !blocking)
             StartCoroutine(WasHit());
         else if (wasHit && blocking)
+        {
             StartCoroutine(Blocked());
-
+            blocking = false;
+        }
         if (itsTurn)
         {
             StartCoroutine(Attack());
@@ -104,7 +114,18 @@ public class EnemyController : MonoBehaviour
         }
         else if (attackNum == 3)
         {
-            Attacked3 = true;
+            kickProb = Random.Range(0, 100);
+            if (kickProb <= baseAccuracy)
+            {
+                Attacked3 = true;
+                playerController.kicked = true;
+                unblockable = true;
+            }
+            else
+            {
+                numAttack3 = 2;
+                Attacked3 = false;
+            }
         }
         else if (attackNum == 4)
         {
@@ -163,9 +184,36 @@ public class EnemyController : MonoBehaviour
         {
             animator.SetInteger("AttackNum", 0);
             hit = false;
-            damageDealer.hit = true;
+
+            if (kickProb == -1)
+            {
+                hitProb = Random.Range(0, 100);
+                Debug.Log(hitProb);
+            }
+            else
+            {
+                hitProb = kickProb;
+            }
+
+            if (hitProb <= baseAccuracy || unblockable == true)
+            {
+                damageDealer.hit = true;
+                unblockable = false;
+            }
+            else
+            {
+                playerController.blocking = true;
+            }
+
             playerController.wasHit = true;
-            StartCoroutine(MakePlayerTurn());
+            if (playerController.kicked)
+            {
+                playerController.itsTurn = false;
+            }
+            else
+            {
+                StartCoroutine(MakePlayerTurn());
+            }
         }
     }
 
@@ -175,7 +223,16 @@ public class EnemyController : MonoBehaviour
         animator.SetBool("WasHit", true);
         yield return new WaitForSeconds(0.64f);
         animator.SetBool("WasHit", false);
-        itsTurn = true;
+        if (kicked == true)
+        {
+            kicked = false;
+            itsTurn = false;
+            StartCoroutine(MakePlayerTurn());
+        }
+        else
+        {
+            itsTurn = true;
+        }
     }
 
     IEnumerator Blocked()
